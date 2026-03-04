@@ -2,16 +2,14 @@ from flask import Flask, render_template
 
 app = Flask(__name__)
 
-# Simulated content database
-CONTENT = {
-    "home": "Welcome to the Information Technology Department… content not added yet.",
-    "about": "About page content… content not added yet.",
-    "info": "Info page content… content not added yet.",
-    "contact": "Contact page content… content not added yet."
-}
-
 # Function to get page content
 def get_content(page):
+    CONTENT = {
+        "home": "Welcome to the Information Technology Department… content not added yet.",
+        "about": "About page content… content not added yet.",
+        "info": "Info page content… content not added yet.",
+        "contact": "Contact page content… content not added yet."
+    }
     return CONTENT.get(page, "Content not added yet.")
 
 # Routes
@@ -33,8 +31,9 @@ def contact():
 
 # Main entry point
 if __name__ == "__main__":
-    # Render assigns a PORT via environment variable
     import os
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host="0.0.0.0", port=port)    import os
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)def get_content(page):
     data = []  # or fetch from your DB/file
