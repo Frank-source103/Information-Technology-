@@ -35,13 +35,8 @@ init_db()
 
 # Get page content
 def get_content(page):
-    conn = sqlite3.connect(DB_PATH)
-    c = conn.cursor()
-    c.execute("SELECT body FROM content WHERE page=?", (page,))
-    data = c.fetchone()
-    conn.close()
+    data = []  # or fetch from your DB/file
     return data[0] if data else "Content not added yet."
-
 # Routes
 @app.route('/')
 def home():
@@ -186,6 +181,5 @@ def dashboard():
 def logout():
     session.pop('admin', None)
     return redirect('/')
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run(host='0.0.0.0', port=10000)
