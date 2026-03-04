@@ -1,40 +1,42 @@
-from flask import Flask, render_template, request, redirect, url_for, session
-import sqlite3
-import os
+from flask import Flask, render_template
 
 app = Flask(__name__)
-app.secret_key = os.environ.get("SECRET_KEY", "supersecretkey")
 
-# Database path
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DB_PATH = os.path.join(BASE_DIR, "database.db")
+# Simulated content database
+CONTENT = {
+    "home": "Welcome to the Information Technology Department… content not added yet.",
+    "about": "About page content… content not added yet.",
+    "info": "Info page content… content not added yet.",
+    "contact": "Contact page content… content not added yet."
+}
 
-# Initialize database
-def init_db():
-    conn = sqlite3.connect(DB_PATH)
-    c = conn.cursor()
-    c.execute('''
-        CREATE TABLE IF NOT EXISTS content (
-            id INTEGER PRIMARY KEY,
-            page TEXT UNIQUE,
-            body TEXT
-        )
-    ''')
-    c.execute('''
-        CREATE TABLE IF NOT EXISTS messages (
-            id INTEGER PRIMARY KEY,
-            name TEXT,
-            email TEXT,
-            message TEXT
-        )
-    ''')
-    conn.commit()
-    conn.close()
-
-init_db()
-
-# Get page content
+# Function to get page content
 def get_content(page):
+    return CONTENT.get(page, "Content not added yet.")
+
+# Routes
+@app.route("/")
+def home():
+    return render_template("index.html", content=get_content("home"))
+
+@app.route("/about")
+def about():
+    return render_template("about.html", content=get_content("about"))
+
+@app.route("/info")
+def info():
+    return render_template("info.html", content=get_content("info"))
+
+@app.route("/contact")
+def contact():
+    return render_template("contact.html", content=get_content("contact"))
+
+# Main entry point
+if __name__ == "__main__":
+    # Render assigns a PORT via environment variable
+    import os
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host="0.0.0.0", port=port)def get_content(page):
     data = []  # or fetch from your DB/file
     return data[0] if data else "Content not added yet."
 # Routes
