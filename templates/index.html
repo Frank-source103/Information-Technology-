@@ -2,9 +2,25 @@
 <html>
 <head>
     <title>Department Home</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <h1>Welcome to Information Technology Department</h1>
+<div class="navbar">
+    <div>Information Technology Department</div>
+    <div>
+        <a href="{{ url_for('home') }}">Home</a>
+        <a href="{{ url_for('about') }}">About</a>
+        <a href="{{ url_for('info') }}">Info</a>
+        <a href="{{ url_for('contact') }}">Contact</a>
+    </div>
+</div>
+
+<div class="hero">
+    <h1>Welcome to the Information Technology Department</h1>
+</div>
+
+<div class="content">
     <p>{{ content }}</p>
+</div>
 </body>
 </html>
