@@ -1,53 +1,60 @@
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_from_directory
 import sqlite3
 import os
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
+app.secret_key = "supersecretkey"
 
-# -----------------------------
+UPLOAD_FOLDER = "uploads"
+ALLOWED_EXTENSIONS = {"pdf", "docx", "pptx", "zip"}
+
+app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
+
+
+# ----------------------------
 # DATABASE CONNECTION
-# -----------------------------
+# ----------------------------
+
 def get_db():
     conn = sqlite3.connect("database.db")
     conn.row_factory = sqlite3.Row
     return conn
 
 
-# -----------------------------
+# ----------------------------
 # DATABASE INITIALIZATION
-# -----------------------------
+# ----------------------------
+
 def init_db():
     conn = get_db()
 
     conn.execute("""
-    CREATE TABLE IF NOT EXISTS news(
+    CREATE TABLE IF NOT EXISTS staff (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT,
+        position TEXT,
+        photo TEXT
+    )
+    """)
+
+    conn.execute("""
+    CREATE TABLE IF NOT EXISTS courses (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT,
+        description TEXT,
+        material TEXT
+    )
+    """)
+
+    conn.execute("""
+    CREATE TABLE IF NOT EXISTS news (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         title TEXT,
         content TEXT
-    )
-    """)
-
-    conn.execute("""
-    CREATE TABLE IF NOT EXISTS staff(
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT,
-        role TEXT
-    )
-    """)
-
-    conn.execute("""
-    CREATE TABLE IF NOT EXISTS courses(
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        course_code TEXT,
-        course_name TEXT
-    )
-    """)
-
-    conn.execute("""
-    CREATE TABLE IF NOT EXISTS events(
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        title TEXT,
-        date TEXT
     )
     """)
 
@@ -58,9 +65,10 @@ def init_db():
 init_db()
 
 
-# -----------------------------
+# ----------------------------
 # BASIC PAGES
-# -----------------------------
+# ----------------------------
+
 @app.route("/")
 def home():
     return render_template("index.html")
@@ -76,145 +84,194 @@ def info():
     return render_template("info.html")
 
 
-# -----------------------------
-# CONTACT PAGE
-# -----------------------------
-@app.route("/contact", methods=["GET", "POST"])
+@app.route("/contact")
 def contact():
-
-    if request.method == "POST":
-        name = request.form["name"]
-        email = request.form["email"]
-        message = request.form["message"]
-
-        print("Contact message:", name, email, message)
-
     return render_template("contact.html")
 
 
-# -----------------------------
-# NEWS PAGE
-# -----------------------------
-@app.route("/news")
-def news():
-
-    conn = get_db()
-    posts = conn.execute("SELECT * FROM news").fetchall()
-    conn.close()
-
-    return render_template("news.html", posts=posts)
-
-
-# -----------------------------
+# ----------------------------
 # STAFF DIRECTORY
-# -----------------------------
+# ----------------------------
+
 @app.route("/staff")
 def staff():
-
     conn = get_db()
     staff = conn.execute("SELECT * FROM staff").fetchall()
     conn.close()
-
     return render_template("staff.html", staff=staff)
 
 
-# -----------------------------
+# ----------------------------
 # COURSES PAGE
-# -----------------------------
+# ----------------------------
+
 @app.route("/courses")
 def courses():
-
     conn = get_db()
     courses = conn.execute("SELECT * FROM courses").fetchall()
     conn.close()
-
     return render_template("courses.html", courses=courses)
 
 
-# -----------------------------
-# EVENTS PAGE
-# -----------------------------
-@app.route("/events")
-def events():
+# ----------------------------
+# DOWNLOAD COURSE MATERIAL
+# ----------------------------
 
+@app.route("/download/<filename>")
+def download_file(filename):
+    return send_from_directory(app.config["UPLOAD_FOLDER"], filename)
+
+
+# ----------------------------
+# NEWS PAGE
+# ----------------------------
+
+@app.route("/news")
+def news():
     conn = get_db()
-    events = conn.execute("SELECT * FROM events").fetchall()
+    posts = conn.execute("SELECT * FROM news").fetchall()
     conn.close()
+    return render_template("news.html", posts=posts)
 
-    return render_template("events.html", events=events)
+
+# ----------------------------
+# ADMIN LOGIN
+# ----------------------------
+
+ADMIN_USERNAME = "admin"
+ADMIN_PASSWORD = "admin123"
 
 
-# -----------------------------
-# ADMIN DASHBOARD
-# -----------------------------
 @app.route("/admin", methods=["GET", "POST"])
-def admin():
+def admin_login():
+    if request.method == "POST":
+        username = request.form["username"]
+        password = request.form["password"]
+
+        if username == ADMIN_USERNAME and password == ADMIN_PASSWORD:
+            session["admin"] = True
+            return redirect(url_for("dashboard"))
+        else:
+            flash("Invalid login")
+
+    return render_template("admin_login.html")
+
+
+# ----------------------------
+# ADMIN DASHBOARD
+# ----------------------------
+
+@app.route("/dashboard")
+def dashboard():
+    if not session.get("admin"):
+        return redirect(url_for("admin_login"))
 
     conn = get_db()
 
-    if request.method == "POST":
-
-        form_type = request.form.get("form_type")
-
-        if form_type == "news":
-            title = request.form["title"]
-            content = request.form["content"]
-
-            conn.execute(
-                "INSERT INTO news (title, content) VALUES (?,?)",
-                (title, content)
-            )
-
-        elif form_type == "staff":
-            name = request.form["name"]
-            role = request.form["role"]
-
-            conn.execute(
-                "INSERT INTO staff (name, role) VALUES (?,?)",
-                (name, role)
-            )
-
-        elif form_type == "course":
-            code = request.form["course_code"]
-            name = request.form["course_name"]
-
-            conn.execute(
-                "INSERT INTO courses (course_code, course_name) VALUES (?,?)",
-                (code, name)
-            )
-
-        elif form_type == "event":
-            title = request.form["title"]
-            date = request.form["date"]
-
-            conn.execute(
-                "INSERT INTO events (title, date) VALUES (?,?)",
-                (title, date)
-            )
-
-        conn.commit()
-
-        return redirect("/admin")
-
-    news = conn.execute("SELECT * FROM news").fetchall()
     staff = conn.execute("SELECT * FROM staff").fetchall()
     courses = conn.execute("SELECT * FROM courses").fetchall()
-    events = conn.execute("SELECT * FROM events").fetchall()
+    news = conn.execute("SELECT * FROM news").fetchall()
 
     conn.close()
 
-    return render_template(
-        "admin.html",
-        news=news,
-        staff=staff,
-        courses=courses,
-        events=events
+    return render_template("dashboard.html", staff=staff, courses=courses, news=news)
+
+
+# ----------------------------
+# ADD STAFF
+# ----------------------------
+
+@app.route("/add_staff", methods=["POST"])
+def add_staff():
+    if not session.get("admin"):
+        return redirect(url_for("admin_login"))
+
+    name = request.form["name"]
+    position = request.form["position"]
+
+    photo = request.files["photo"]
+
+    filename = secure_filename(photo.filename)
+    photo.save(os.path.join("static/staff", filename))
+
+    conn = get_db()
+    conn.execute(
+        "INSERT INTO staff (name, position, photo) VALUES (?, ?, ?)",
+        (name, position, filename)
+    )
+    conn.commit()
+    conn.close()
+
+    return redirect(url_for("dashboard"))
+
+
+# ----------------------------
+# ADD COURSE
+# ----------------------------
+
+@app.route("/add_course", methods=["POST"])
+def add_course():
+    if not session.get("admin"):
+        return redirect(url_for("admin_login"))
+
+    title = request.form["title"]
+    description = request.form["description"]
+
+    material = request.files["material"]
+
+    filename = secure_filename(material.filename)
+    material.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
+
+    conn = get_db()
+    conn.execute(
+        "INSERT INTO courses (title, description, material) VALUES (?, ?, ?)",
+        (title, description, filename)
     )
 
+    conn.commit()
+    conn.close()
 
-# -----------------------------
+    return redirect(url_for("dashboard"))
+
+
+# ----------------------------
+# ADD NEWS
+# ----------------------------
+
+@app.route("/add_news", methods=["POST"])
+def add_news():
+    if not session.get("admin"):
+        return redirect(url_for("admin_login"))
+
+    title = request.form["title"]
+    content = request.form["content"]
+
+    conn = get_db()
+    conn.execute(
+        "INSERT INTO news (title, content) VALUES (?, ?)",
+        (title, content)
+    )
+
+    conn.commit()
+    conn.close()
+
+    return redirect(url_for("dashboard"))
+
+
+# ----------------------------
+# LOGOUT
+# ----------------------------
+
+@app.route("/logout")
+def logout():
+    session.pop("admin", None)
+    return redirect(url_for("home"))
+
+
+# ----------------------------
 # RUN SERVER
-# -----------------------------
+# ----------------------------
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
