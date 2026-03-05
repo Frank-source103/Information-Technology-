@@ -2,39 +2,43 @@ from flask import Flask, render_template
 
 app = Flask(__name__)
 
-# Function to get page content
+# Simple content storage
+CONTENT = {
+    "home": "Welcome to the Information Technology Department. Content not added yet.",
+    "about": "About the Information Technology Department. Content not added yet.",
+    "info": "Information page. Content not added yet.",
+    "contact": "Contact the Information Technology Department. Content not added yet."
+}
+
+# Function to fetch content
 def get_content(page):
-    CONTENT = {
-        "home": "Welcome to the Information Technology Department… content not added yet.",
-        "about": "About page content… content not added yet.",
-        "info": "Info page content… content not added yet.",
-        "contact": "Contact page content… content not added yet."
-    }
     return CONTENT.get(page, "Content not added yet.")
 
-# Routes
+# Home page
 @app.route("/")
 def home():
     return render_template("index.html", content=get_content("home"))
 
+# About page
 @app.route("/about")
 def about():
     return render_template("about.html", content=get_content("about"))
 
+# Info page
 @app.route("/info")
 def info():
     return render_template("info.html", content=get_content("info"))
 
+# Contact page
 @app.route("/contact")
 def contact():
     return render_template("contact.html", content=get_content("contact"))
 
-# Main entry point
+# Run the application
 if __name__ == "__main__":
     import os
     port = int(os.environ.get("PORT", 10000))
-    app.run(host="0.0.0.0", port=port)    import os
-    port = int(os.environ.get("PORT", 10000))
+    app.run(host="0.0.0.0", port=port)    port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)def get_content(page):
     data = []  # or fetch from your DB/file
     return data[0] if data else "Content not added yet."
