@@ -1,25 +1,44 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Department Home</title>
+<meta charset="UTF-8">
+<title>IT Department</title>
 <link rel="stylesheet" href="../static/index.css">
+</head>
+
 <body>
-<div class="navbar">
-    <div>Information Technology Department</div>
-    <div>
-        <a href="{{ url_for('home') }}">Home</a>
-        <a href="{{ url_for('about') }}">About</a>
-        <a href="{{ url_for('info') }}">Info</a>
-        <a href="{{ url_for('contact') }}">Contact</a>
-    </div>
-</div>
 
-<div class="hero">
-    <h1>Welcome to the Information Technology Department</h1>
-</div>
+<nav>
+<h1>IT Department</h1>
 
-<div class="content">
-    <p>{{ content }}</p>
+<ul>
+<li><a href="/">Home</a></li>
+<li><a href="/about">About</a></li>
+<li><a href="/info">Info</a></li>
+<li><a href="/staff">Staff</a></li>
+<li><a href="/courses">Courses</a></li>
+<li><a href="/news">News</a></li>
+<li><a href="/events">Events</a></li>
+<li><a href="/contact">Contact</a></li>
+</ul>
+</nav>
+
+<section class="hero">
+<h2>Welcome to the Information Technology Department</h2>
+<p>Empowering students with modern technology skills.</p>
+</section>
+
+<section class="content">
+<h3>Latest News</h3>
+
+{% for post in posts %}
+<div class="card">
+<h4>{{ post.title }}</h4>
+<p>{{ post.content }}</p>
 </div>
+{% endfor %}
+
+</section>
+
 </body>
-</html>
+    </html>
