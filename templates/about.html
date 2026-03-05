@@ -1,26 +1,36 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>About - IT Department</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<title>About</title>
+<link rel="stylesheet" href="../static/index.css">
 </head>
+
 <body>
-    <div class="navbar">
-        <div>Information Technology Department</div>
-        <div>
-            <a href="{{ url_for('home') }}">Home</a>
-            <a href="{{ url_for('about') }}">About</a>
-            <a href="{{ url_for('info') }}">Info</a>
-            <a href="{{ url_for('contact') }}">Contact</a>
-        </div>
-    </div>
 
-    <div class="hero">
-        <h1>About Our Department</h1>
-    </div>
+<nav>
+<h1>IT Department</h1>
 
-    <div class="content">
-        <p>{{ content }}</p>
-    </div>
+<ul>
+<li><a href="/">Home</a></li>
+<li><a href="/about">About</a></li>
+<li><a href="/info">Info</a></li>
+<li><a href="/staff">Staff</a></li>
+<li><a href="/courses">Courses</a></li>
+<li><a href="/news">News</a></li>
+<li><a href="/events">Events</a></li>
+<li><a href="/contact">Contact</a></li>
+</ul>
+</nav>
+
+<section class="content">
+<h2>About Our Department</h2>
+
+<p>
+The Information Technology Department focuses on training students
+in programming, networking, cybersecurity, and modern computing technologies.
+</p>
+
+</section>
+
 </body>
 </html>
