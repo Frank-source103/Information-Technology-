@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>News</title>
+<link rel="stylesheet" href="../static/index.css">
+</head>
+
+<body>
+
+<nav>
+<h1>IT Department</h1>
+
+<ul>
+<li><a href="/">Home</a></li>
+<li><a href="/about">About</a></li>
+<li><a href="/info">Info</a></li>
+<li><a href="/staff">Staff</a></li>
+<li><a href="/courses">Courses</a></li>
+<li><a href="/news">News</a></li>
+<li><a href="/events">Events</a></li>
+<li><a href="/contact">Contact</a></li>
+</ul>
+</nav>
+
+<section class="content">
+
+<h2>Department News</h2>
+
+{% for post in posts %}
+
+<div class="card">
+<h3>{{ post.title }}</h3>
+<p>{{ post.content }}</p>
+</div>
+
+{% endfor %}
+
+</section>
+
+</body>
+</html>
