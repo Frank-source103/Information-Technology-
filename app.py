@@ -88,7 +88,14 @@ def info():
 def contact():
     return render_template("contact.html")
 
+@app.route("/admin_login")
+def login():
+    return render_template("admin_login.html")
 
+@app.route("/admin_dashboard"
+def dadhboard():
+    return render_template("admin_dashboard.html")
+    
 # ----------------------------
 # STAFF DIRECTORY
 # ----------------------------
